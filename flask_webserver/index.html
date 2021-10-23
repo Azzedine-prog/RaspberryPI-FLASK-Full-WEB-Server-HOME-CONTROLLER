@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>flask hello world</title>
+	<meta charset="utf-8">
+	<!--<meta http-equiv="refresh" content="5" >-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">   
+	<title>flask GPIO</title>
+</head>
+<body>
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<!--<script>
+	$(document).ready(
+            function() {
+                setInterval(function() {
+                    var randomnumber = Math.floor(Math.random() * 100);
+                    $('#div3').text(
+                            'I am getting refreshed every 3 seconds..! Random Number ==> '
+                                    + randomnumber);
+                }, 3000);
+            });
+	</script>-->
+  <a class="navbar-brand" href="#">Raspberry pi Home Controller</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">les machines<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Dropdown
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Temperature</a>
+          <a class="dropdown-item" href="#">Humidité</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">killer be</a>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+<!--<p type="submit" href="/hi" name="action1"> click here </p> -->
+<!--<form action="/hi">
+    <input type="submit" value="Go to Google" />
+</form>-->
+<div class="row">
+<table class="table table-dark">
+  <tr>
+		<th scope="col">#</th>
+    <th scope="col">machine</th>
+    <th scope="col">status</th>
+    <th scope="col">action</th>
+  </tr>
+  {% for machine in machines %}
+  <tr>
+		<th scope="row">1</th>
+    <td scope="row">{{machines[machine].name}}</td>
+		<td scope="row">{{machines[machine].status}}</td>
+    <td scope="row">
+                {% if machines[machine].state == "OFF" %}
+                <!--<a href="/{{machine}}/off"> Turn Off</a>-->
+								<form action="/{{machine}}/off">
+    						<input type="submit" value="Turn Off" />
+									</form>
+                {% else %}
+                <!--<a href="/{{machine}}/on">Turn On</a>-->
+								<form action="/{{machine}}/on">
+    						<input type="submit" value="Turn On" />
+									</form>
+                {% endif %}
+    </td>
+  </tr>
+     {% endfor %}
+</table>
+</div>
+<div scope="row">
+{% if servo_state == "ON" %}
+                <!--<a href="/servo/off"> Turn Off</a>-->
+<p>le garage est ouvert voulez vous le fermer</p>
+								<form action="/servo/off">
+    						<input type="submit" class="form-control" value="fermer le garage" />
+									</form>
+                {% else %}
+                <!--<a href="/servo/on">Turn On</a>-->
+<p>le garage est fermé voulez vous l'ouvrir</p>
+								<form action="/servo/on">
+    						<input type="submit" class="form-control" value="ouvrir le garage" />
+									</form>
+                {% endif %}
+</div>
+</br></br>
+<div scope="row">
+<div scope="col">
+<p><b>maintenant c'est sombre la lampe est allumé<b></p>
+</div>
+</div>
+<div scope="row">
+<div scope="col">
+  
+    <h1>{{ title }}</h1>
+
+    <canvas id="chart" width="600" height="400"></canvas>
+    <script>
+
+      // bar chart data
+      var barData = {
+        labels : [
+          {% for item in labels %}
+            "{{ item }}",
+          {% endfor %}
+        ],
+
+        datasets : [{
+          fillColor: "rgba(151,187,205,0.2)",
+          strokeColor: "rgba(151,187,205,1)",
+          pointColor: "rgba(151,187,205,1)",
+          pointStrokeColor: "#fff",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(151,187,205,1)",
+          bezierCurve : false,
+          data : [
+	    {% for item in values %}
+              {{ item }},
+            {% endfor %}]
+          }
+	]
+      }
+
+      Chart.defaults.global.animationSteps = 50;
+      Chart.defaults.global.tooltipYPadding = 16;
+      Chart.defaults.global.tooltipCornerRadius = 0;
+      Chart.defaults.global.tooltipTitleFontStyle = "normal";
+      Chart.defaults.global.tooltipFillColor = "rgba(0,0,0,0.8)";
+      Chart.defaults.global.animationEasing = "easeOutBounce";
+      Chart.defaults.global.responsive = false;
+      Chart.defaults.global.scaleLineColor = "black";
+      Chart.defaults.global.scaleFontSize = 16;
+
+      // get bar chart canvas
+      var mychart = document.getElementById("chart").getContext("2d");
+
+      steps = 10
+      max = {{ max }}
+      // draw bar chart
+      var LineChartDemo = new Chart(mychart).Line(barData, {
+        scaleOverride: true,
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true,
+        bezierCurve: false,
+      });
+
+    </script>
+</div>
+<div scope="col">
+
+    <h1>{{ humidtitle }}</h1>
+
+    <div><canvas id="chart2" width="600" height="400"></canvas></div>
+    <script>
+
+      // bar chart data
+      var barData2 = {
+        labels : [
+          {% for item in labels %}
+            "{{ item }}",
+          {% endfor %}
+        ],
+
+        datasets : [{
+          fillColor: "rgba(151,187,205,0.2)",
+          strokeColor: "rgba(151,187,205,1)",
+          pointColor: "rgba(151,187,205,1)",
+          pointStrokeColor: "#fff",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(151,187,205,1)",
+          bezierCurve : false,
+          data : [
+	    {% for item in humidvalues %}
+              {{ item }},
+            {% endfor %}]
+          }
+	]
+      }
+
+      Chart.defaults.global.animationSteps = 50;
+      Chart.defaults.global.tooltipYPadding = 16;
+      Chart.defaults.global.tooltipCornerRadius = 0;
+      Chart.defaults.global.tooltipTitleFontStyle = "normal";
+      Chart.defaults.global.tooltipFillColor = "rgba(0,0,0,0.8)";
+      Chart.defaults.global.animationEasing = "easeOutBounce";
+      Chart.defaults.global.responsive = false;
+      Chart.defaults.global.scaleLineColor = "black";
+      Chart.defaults.global.scaleFontSize = 16;
+
+      // get bar chart canvas
+      var mychart2 = document.getElementById("chart2").getContext("2d");
+
+      steps = 10
+      max = {{ max }}
+      // draw bar chart
+      var LineChartDemo2 = new Chart(mychart2).Line(barData2, {
+        scaleOverride: true,
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true,
+        bezierCurve: false,
+      });
+
+    </script>
+<div scope="row">
+{% if carman == 1 %}
+  <p>voiture est la </p>              
+<p> distance restante  = <span>{{ distanceman }}</span><p>
+                {% else %}
+		<p>pas de voiture dans le garage</p>
+                {% endif %}
+</div>
+</div>
+</div>
+<form action="/servo/off">
+    						<input type="submit" class="form-control" value="passer vers le mode manuel" />
+									</form>
+
+</body>
+</html>>
